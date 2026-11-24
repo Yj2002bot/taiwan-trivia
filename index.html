@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>小廢的台灣冷知識</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* 版面：垃圾車追逐夜。整頁固定夜景，前景一張置中的測驗卡；只做深色一種畫面（夜晚本身就是主題）。 */
+:root{
+  color-scheme:dark;
+  --night:#0f1424; --night-2:#18203a; --card:#1c2440; --card-2:#252f52;
+  --ink:#f3efe2; --muted:#b9bfd3; --line:#3a456e;
+  --truck:#f2c230; --truck-ink:#1b1a12; --good:#7fd39a; --bad:#ff9b85;
+  --display:"Huninn","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  --body:"Noto Sans TC","Microsoft JhengHei",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--night);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6}
+
+/* 夜景 */
+.scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.scene svg{width:100%;height:100%;display:block}
+.win{animation:flick 9s steps(2) infinite}
+.truck{animation:drive 26s linear infinite}
+.note{animation:float 26s linear infinite}
+.wheel{animation:spin 1.2s linear infinite;transform-box:fill-box;transform-origin:center}
+@keyframes flick{0%,100%{opacity:.9}50%{opacity:.35}}
+@keyframes drive{from{transform:translateX(-420px)}to{transform:translateX(1900px)}}
+@keyframes float{from{transform:translateX(-420px)}to{transform:translateX(1900px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+/* 版面 */
+.wrap{position:relative;z-index:1;min-height:100%;display:flex;flex-direction:column;align-items:center;
+  padding-block:24px 160px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.status{width:100%;max-width:640px;display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:space-between;align-items:center;
+  font-size:14px;color:var(--muted);margin-bottom:16px}
+.status b{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums}
+.meter{display:inline-block;width:72px;height:8px;border-radius:4px;background:var(--line);vertical-align:middle;margin-left:6px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--truck);transition:width .4s}
+
+.card{width:100%;max-width:640px;background:color-mix(in srgb,var(--card) 92%,transparent);border:1px solid var(--line);
+  border-radius:18px;padding:28px 24px;backdrop-filter:blur(6px)}
+@supports not (background:color-mix(in srgb,red,blue)){.card{background:var(--card)}}
+h1,h2{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance}
+h1{font-size:clamp(28px,6vw,40px);line-height:1.3}
+h2{font-size:clamp(20px,4.6vw,26px);line-height:1.45}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.12em;color:var(--truck-ink);background:var(--truck);
+  border-radius:999px;padding:2px 12px;margin-bottom:14px}
+.face{font-family:var(--body);color:var(--truck);font-size:20px;margin:0 0 6px}
+.lead{color:var(--muted);margin:14px 0 22px}
+.opts{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:10px}
+.opt{width:100%;text-align:left;display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:12px;
+  border:1px solid var(--line);background:var(--card-2);color:var(--ink);font:inherit;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--truck)}
+.opt .k{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--night-2);
+  font-weight:700;font-size:14px}
+.opt.right{border-color:var(--good)} .opt.right .k{background:var(--good);color:var(--truck-ink)}
+.opt.wrong{border-color:var(--bad)} .opt.wrong .k{background:var(--bad);color:var(--truck-ink)}
+.opt:disabled{cursor:default}
+.say{margin-top:18px;padding:14px 16px;border-radius:12px;background:var(--night-2);border-left:4px solid var(--truck)}
+.say .who{font-size:13px;color:var(--muted);display:block;margin-bottom:2px}
+.say.good{border-left-color:var(--good)} .say.bad{border-left-color:var(--bad)}
+.btn{margin-top:22px;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:10px 22px;border-radius:999px;border:0;
+  background:var(--truck);color:var(--truck-ink);font:inherit;font-weight:700;cursor:pointer}
+.btn:hover{filter:brightness(1.06)}
+.progress{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.score{font-family:var(--display);font-size:56px;line-height:1.1;color:var(--truck);margin:10px 0 4px}
+.note-src{margin-top:22px;font-size:12px;color:var(--muted)}
+:focus-visible{outline:3px solid var(--truck);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="scene" aria-hidden="true">
+<svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMax slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1020"/><stop offset="1" stop-color="#1d2748"/></linearGradient>
+    <radialGradient id="lamp"><stop offset="0" stop-color="#ffd98a" stop-opacity=".55"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#sky)"/>
+  <circle cx="1380" cy="120" r="34" fill="#efe9d2" opacity=".85"/>
+  <!-- buildings -->
+  <g fill="#141a30">
+    <rect x="0" y="560" width="190" height="440"/><rect x="190" y="500" width="150" height="500"/>
+    <rect x="340" y="600" width="210" height="400"/><rect x="550" y="540" width="130" height="460"/>
+    <rect x="680" y="620" width="240" height="380"/><rect x="920" y="520" width="160" height="480"/>
+    <rect x="1080" y="590" width="200" height="410"/><rect x="1280" y="530" width="170" height="470"/>
+    <rect x="1450" y="600" width="150" height="400"/>
+  </g>
+  <!-- iron window grilles and lit windows -->
+  <g fill="#f2c96b">
+    <rect class="win" x="40" y="610" width="34" height="26" opacity=".8"/>
+    <rect x="110" y="680" width="34" height="26" opacity=".5"/>
+    <rect class="win" x="230" y="560" width="30" height="24" opacity=".7" style="animation-delay:-3s"/>
+    <rect x="400" y="650" width="36" height="26" opacity=".6"/>
+    <rect class="win" x="590" y="600" width="30" height="24" opacity=".8" style="animation-delay:-5s"/>
+    <rect x="740" y="670" width="36" height="26" opacity=".45"/>
+    <rect class="win" x="960" y="580" width="32" height="24" opacity=".75" style="animation-delay:-1s"/>
+    <rect x="1130" y="650" width="34" height="26" opacity=".55"/>
+    <rect class="win" x="1320" y="590" width="32" height="24" opacity=".7" style="animation-delay:-7s"/>
+    <rect x="1490" y="660" width="34" height="26" opacity=".5"/>
+  </g>
+  <!-- street lamps -->
+  <g>
+    <circle cx="300" cy="790" r="120" fill="url(#lamp)"/><rect x="296" y="790" width="6" height="150" fill="#2a3256"/>
+    <circle cx="300" cy="790" r="9" fill="#ffe3a3"/>
+    <circle cx="1220" cy="790" r="120" fill="url(#lamp)"/><rect x="1216" y="790" width="6" height="150" fill="#2a3256"/>
+    <circle cx="1220" cy="790" r="9" fill="#ffe3a3"/>
+  </g>
+  <!-- road -->
+  <rect y="930" width="1600" height="70" fill="#0c101d"/>
+  <g stroke="#3a4266" stroke-width="4" stroke-dasharray="40 40"><line x1="0" y1="968" x2="1600" y2="968"/></g>
+  <!-- garbage truck -->
+  <g class="truck">
+    <rect x="0" y="842" width="230" height="78" rx="6" fill="#f2c230"/>
+    <rect x="230" y="862" width="80" height="58" rx="6" fill="#f2c230"/>
+    <rect x="246" y="870" width="44" height="22" rx="3" fill="#1d2748"/>
+    <rect x="12" y="856" width="206" height="10" fill="#d9a91d"/>
+    <circle class="wheel" cx="60" cy="924" r="16" fill="#1a1a1a" stroke="#555" stroke-width="4" stroke-dasharray="6 6"/>
+    <circle class="wheel" cx="260" cy="924" r="16" fill="#1a1a1a" stroke="#555" stroke-width="4" stroke-dasharray="6 6"/>
+    <circle cx="308" cy="904" r="5" fill="#fff3c4"/>
+  </g>
+  <!-- music notes riding with the truck -->
+  <g class="note" fill="#f2c230" font-size="34" font-family="sans-serif">
+    <text x="40" y="815" style="animation:bob 2.6s ease-in-out infinite">♪</text>
+    <text x="110" y="790" style="animation:bob 3.1s ease-in-out infinite -1s">♫</text>
+    <text x="180" y="818" style="animation:bob 2.8s ease-in-out infinite -2s">♪</text>
+  </g>
+</svg>
+</div>
+
+<main class="wrap">
+  <div class="status" aria-live="polite">
+    <span>小廢電量 <b id="batt">50%</b><span class="meter"><i id="battBar" style="width:50%"></i></span></span>
+    <span>你的梗存量 <b id="memes">10</b></span>
+  </div>
+  <section class="card" id="card"></section>
+</main>
+
+<script>
+const OPENING = "歡迎來到沒梗小廢的台灣冷知識小測驗！答對幫小廢充電，答錯扣你的梗。準備好了嗎？好喔，沒準備好也要開始了。";
+const Q = [
+  {kind:"冷笑話", q:"為什麼台灣的超商店員都不怕被搶？",
+   o:["店裡有監視器","搶匪進門就被問「有會員嗎？有載具嗎？要袋子嗎？」，問到放棄","店員都會功夫","收銀機裡只有零錢"], a:1,
+   ok:"你一定也被問到崩潰過，同是天涯淪落人 🤝", no:"監視器？太認真了吧，這是冷笑話，放輕鬆好嗎"},
+  {kind:"冷知識", q:"台灣垃圾車最常播的兩首古典樂是？",
+   o:["《給愛麗絲》和《少女的祈禱》","《小星星》和《生日快樂》","《命運交響曲》和《卡農》","《土耳其進行曲》和《藍色多瑙河》"], a:0,
+   ok:"恭喜，你的腳已經自動往門口移動了 🚛", no:"你是不是都讓家人去倒垃圾？今晚換你"},
+  {kind:"冷笑話", q:"台灣人出國最想念、「不能吃不能喝卻每天都在用」的是？",
+   o:["悠遊卡","健保卡","免費又乾淨的超商廁所","機車"], a:2,
+   ok:"在歐洲投過硬幣上廁所的人，都懂那份痛 🚽", no:"也不是不行，但標準答案是廁所，小廢說了算"},
+  {kind:"冷知識", q:"在台北捷運付費區喝一口水，可能會被罰多少？",
+   o:["不會罰，喝水可以","新台幣 100 元","新台幣 1,500～7,500 元","罰站一站"], a:2,
+   ok:"守法好公民，捷運站長想頒獎給你", no:"連喝水都不行喔，口渴請出站再喝"},
+  {kind:"冷知識", q:"身分證字號的第一個英文字母代表什麼？",
+   o:["姓氏的第一個字母","初次登記戶籍的縣市","出生的季節","血型"], a:1,
+   ok:"你一定有偷偷研究過朋友的身分證 (¬‿¬)", no:"照姓氏分的話，姓張的就太多了吧"},
+  {kind:"冷知識", q:"統一發票多久開一次獎？",
+   o:["每週","每個月","每兩個月","每年過年"], a:2,
+   ok:"你一定是那種會把發票夾在錢包裡的人，中了記得請客", no:"難怪你的發票都放到過期，可惜了那 200 元"},
+  {kind:"冷笑話", q:"台灣人說「等一下」，實際上是多久？",
+   o:["剛好 60 秒","5 分鐘","1 小時","不一定，可能是永遠"], a:3,
+   ok:"你就是那個說「等一下」然後滑手機滑兩小時的人吧", no:"太天真了，「等一下就好」是台灣最大的謊言之一"},
+  {kind:"冷知識", q:"網路用語「8+9」一般認為是從哪裡來的？",
+   o:["數學考 17 分","「八家將」的台語諧音，後來被拿來指愛打架鬧事的年輕人","一種手機型號","早上 8 點到晚上 9 點的工時"], a:1,
+   ok:"網路老人證核發 👴", no:"你太乖了，PTT 沒逛過喔"},
+  {kind:"冷知識", q:"新竹為什麼被叫做「風城」？",
+   o:["秋冬東北季風（九降風）特別強","市長姓風","市區有很多風車","新竹人講話很「風趣」"], a:0,
+   ok:"沒錯，強到風都可以出來選市長了 🌬️", no:"選市長姓風的請反省，市長是人，不是風"},
+  {kind:"冷知識", q:"颱風天停班停課是誰決定的？",
+   o:["中央氣象署","總統","各縣市政府","學生在網路上集氣"], a:2,
+   ok:"你一定在颱風夜盯著縣市長臉書等過公告 🌀", no:"集氣沒用啦，小廢試過了"},
+  {kind:"冷知識", q:"台灣最高的山是？",
+   o:["玉山","阿里山","合歡山","陽明山"], a:0,
+   ok:"恭喜登頂（約 3,952 公尺），雖然你只是在沙發上動動手指 ⛰️", no:"阿里山是去看日出的，不是去比高的"},
+  {kind:"冷知識", q:"大家常說的「六都」，台灣總共有幾個直轄市？",
+   o:["4 個","5 個","6 個","7 個"], a:2,
+   ok:"名字就叫六都，答對是基本的啦", no:"題目裡就有答案欸，你是不是只看選項 (；´ー｀)"},
+  {kind:"冷知識", q:"全民健保是哪一年開辦的？",
+   o:["1985 年","1995 年","2005 年","2015 年"], a:1,
+   ok:"1995 年 3 月開辦，你比健保卡還熟健保 💳", no:"沒關係，看病有健保，答錯沒有保"},
+  {kind:"冷知識", q:"PTT 最早是在哪裡誕生的？",
+   o:["台灣大學學生架設的 BBS","某家電信公司","政府的網路實驗室","一間網咖的後台"], a:0,
+   ok:"鄉民身分確認，推一個", no:"噓，回去爬文"},
+  {kind:"冷知識", q:"在台灣的大路口騎機車左轉，常常要怎麼做？",
+   o:["直接切到內線左轉","騎到待轉區，兩段式左轉","下車用牽的","按喇叭請大家讓路"], a:1,
+   ok:"標準台灣機車族，待轉區就是你的第二個家 🛵", no:"直接切內線的，罰單會來找你聊聊"},
+  {kind:"冷知識", q:"國道 1 號又叫什麼？",
+   o:["北二高","中山高速公路","濱海公路","台 9 線"], a:1,
+   ok:"連假塞在上面的回憶，是不是都回來了 🚗", no:"北二高是國道 3 號，不要搞混啦"},
+  {kind:"冷知識", q:"珍珠奶茶裡的珍珠，主要是用什麼做的？",
+   o:["樹薯粉","糯米","果凍粉","真的珍珠"], a:0,
+   ok:"懂吃，你的珍奶不是白喝的 🧋", no:"選真的珍珠的，那杯應該要賣一萬塊"},
+  {kind:"冷知識", q:"農曆七月，民間習俗常說最好不要做什麼？",
+   o:["吃月餅","去海邊、溪邊玩水","包粽子","放天燈"], a:1,
+   ok:"阿嬤教得很好，乖 👵", no:"月餅是中秋節，粽子是端午節，你節日大亂鬥喔"},
+  {kind:"冷笑話", q:"台灣長輩見面問「吃飽沒？」，真正的意思是？",
+   o:["要請你吃飯","在檢查你有沒有餓到","就是打招呼，你回「吃飽了」就好","他自己餓了"], a:2,
+   ok:"台灣人社交技能點滿 🍚", no:"真的以為要請客的，這頓飯你等不到的"},
+  {kind:"冷笑話", q:"網路上回一句「好喔」，最可能是什麼意思？",
+   o:["非常同意，熱烈支持","不想吵了，你開心就好","想約你出去","在誇你很棒"], a:1,
+   ok:"你一定也很常收到，或很常發 (￣_￣)", no:"好喔。"},
+];
+const ENDS = {
+  top:"太強了，你根本是台灣本人。小廢電量充飽，梗也被你嚇回來兩個 (*´∀`*)",
+  mid:"還不錯，確實是台灣人，只是偶爾在恍神。多倒幾次垃圾會進步的 (￣_￣)",
+  low:"嗯……你是剛搬來台灣嗎？沒關係，小廢也沒梗，我們半斤八兩，握手 (；´ー｀)",
+};
+const KEYS = ["A","B","C","D"];
+const PER_ROUND = 10;
+const card = document.getElementById("card");
+let i = 0, right = 0, batt = 50, memes = 10, round = [];
+
+/* 洗牌：每輪從題庫隨機抽 PER_ROUND 題，每題的選項順序也打亂，正確答案跟著選項走。 */
+function shuffle(arr){
+  const a = arr.slice();
+  for (let k = a.length - 1; k > 0; k--){ const j = Math.floor(Math.random() * (k + 1)); [a[k], a[j]] = [a[j], a[k]]; }
+  return a;
+}
+function deal(){
+  return shuffle(Q).slice(0, Math.min(PER_ROUND, Q.length)).map(q => {
+    const order = shuffle(q.o.map((_, k) => k));
+    return {...q, o: order.map(k => q.o[k]), a: order.indexOf(q.a)};
+  });
+}
+
+const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function stats(){
+  document.getElementById("batt").textContent = batt + "%";
+  document.getElementById("battBar").style.width = batt + "%";
+  document.getElementById("memes").textContent = memes;
+}
+function focusFirst(sel){ const el = card.querySelector(sel); if (el) el.focus(); }
+
+function start(){
+  i = 0; right = 0; batt = 50; memes = 10; round = deal(); stats();
+  const facts = Q.filter(q => q.kind === "冷知識").length;
+  card.innerHTML = `<span class="kicker">只有台灣人懂</span>
+    <p class="face">(ﾟ∀ﾟ) 小廢</p>
+    <h1>小廢的台灣冷知識小測驗</h1>
+    <p class="lead">${esc(OPENING)}</p>
+    <p class="progress">題庫 ${Q.length} 題（冷知識 ${facts}、冷笑話 ${Q.length - facts}），每輪隨機抽 ${round.length} 題</p>
+    <button class="btn" id="go">開始，往垃圾車衝 🚛</button>`;
+  document.getElementById("go").onclick = ask;
+}
+function ask(){
+  const q = round[i];
+  card.innerHTML = `<p class="progress">第 ${i+1} / ${round.length} 題｜${q.kind}</p>
+    <h2>${esc(q.q)}</h2>
+    <ul class="opts">${q.o.map((t,k)=>`<li><button class="opt" data-k="${k}"><span class="k">${KEYS[k]}</span><span>${esc(t)}</span></button></li>`).join("")}</ul>
+    <div id="after"></div>`;
+  card.querySelectorAll(".opt").forEach(b => b.onclick = () => answer(+b.dataset.k));
+  focusFirst(".opt");
+}
+function answer(k){
+  const q = round[i], ok = k === q.a;
+  card.querySelectorAll(".opt").forEach(b => {
+    const n = +b.dataset.k; b.disabled = true;
+    if (n === q.a) b.classList.add("right");
+    else if (n === k) b.classList.add("wrong");
+  });
+  if (ok){ right++; batt = Math.min(100, batt + 10); } else { memes = Math.max(0, memes - 1); }
+  stats();
+  const last = i === round.length - 1;
+  document.getElementById("after").innerHTML =
+    `<div class="say ${ok?"good":"bad"}"><span class="who">${ok ? "答對了！小廢電量 +10%" : "答錯，梗存量 -1｜正確答案是 " + KEYS[q.a]}</span>${esc(ok ? q.ok : q.no)}</div>
+     <button class="btn" id="next">${last ? "看結果" : "下一題"} →</button>`;
+  document.getElementById("next").onclick = () => { i++; last ? end() : ask(); };
+  focusFirst("#next");
+}
+function end(){
+  const n = round.length, tier = right >= n * 0.9 ? "top" : right >= n * 0.5 ? "mid" : "low";
+  card.innerHTML = `<span class="kicker">成績單</span>
+    <p class="score">${right} / ${n}</p>
+    <p class="progress">小廢電量 ${batt}%｜你的梗存量 ${memes}</p>
+    <p class="lead">${esc(ENDS[tier])}</p>
+    <button class="btn" id="again">再玩一次（換一批題目）</button>
+    <p class="note-src">出題與吐槽：小廢｜網頁：助理。冷知識題已逐題核對；「8+9」的由來是一般說法。</p>`;
+  document.getElementById("again").onclick = start;
+  focusFirst("#again");
+}
+start();
+</script>
+
+</html>
